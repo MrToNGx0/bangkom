@@ -166,7 +166,7 @@
                     formData.append('model_size', model);
                     formData.append('language', language);
 
-                    const res = await fetch('/upload', {
+                    const res = await fetch('/api/upload', {
                         method: 'POST',
                         body: formData,
                     });
