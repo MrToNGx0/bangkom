@@ -47,8 +47,9 @@ async def upload(
     if format_type not in ["txt", "srt"]:
         raise HTTPException(status_code=400, detail="invalid format")
 
-    if model_size not in ["base", "small", "medium"]:
-        model_size = "base"
+    allowed_models = ["base", "small", "medium", "large-v3-turbo", "large-v3"]
+    if model_size not in allowed_models:
+        model_size = "medium" # default to medium for decent accuracy
 
     if language not in ["auto", "th", "en", "ja", "zh"]:
         language = "auto"

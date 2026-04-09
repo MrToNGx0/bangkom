@@ -33,16 +33,27 @@ def transcribe(
     language="auto",
     word_timestamps=True
 ):
+    device = get_device()
     model = get_model(model_size)
 
+    # Improved options for better accuracy
     options = {
         "word_timestamps": word_timestamps,
-        "fp16": False  # CPU safe
+        "fp16": True if device == "cuda" else False, 
+        "beam_size": 5,
+        "best_of": 5,
+        "no_speech_threshold": 0.6,
+        "logprob_threshold": -1.0,
+        "condition_on_previous_text": False, # Helps prevent repetitive loops
     }
+
+    if language == "th":
+        # Initial prompt helps Whisper understand context and language better
+        options["initial_prompt"] = "ภาษาไทย, พูดไทย, Thai language, transcribe correctly."
 
     if language and language != "auto":
         options["language"] = language
 
-    print(f"🎤 Transcribing | {model_size}")
+    print(f"🎤 Transcribing | {model_size} | language: {language}")
 
     return model.transcribe(path, **options)
