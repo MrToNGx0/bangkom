@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+    bangkom:
+        build: .
+        container_name: bangkom-app
+
+        ports:
+            - '8000:8000'
+
+        volumes:
+            - ./input:/app/input
+            - ./output:/app/output
+
+        environment:
+            - PYTHONPATH=/app
+            - TZ=Asia/Bangkok
+
+        command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+        restart: unless-stopped
+
+        healthcheck:
+            test: ['CMD', 'curl', '-f', 'http://localhost:8000/docs']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+
+        logging:
+            options:
+                max-size: '10m'
+                max-file: '3'

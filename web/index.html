@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+    <head>
+        <title>bangkom</title>
+
+        <!-- Tailwind -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+        <script>
+            tailwind.config = { darkMode: 'class' };
+        </script>
+    </head>
+
+    <body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center transition">
+        <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">🎧 Bangkom Subtitle Tool</h1>
+
+                <!-- Toggle -->
+                <button onclick="toggleDark()" class="relative w-14 h-7 bg-gray-300 dark:bg-blue-500 rounded-full">
+                    <div id="toggleDot" class="absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform"></div>
+                </button>
+            </div>
+
+            <!-- Dropzone -->
+            <div
+                id="dropzone"
+                class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition"
+            >
+                <i class="fa-solid fa-upload text-2xl text-gray-500"></i>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">ลากไฟล์มาวาง หรือคลิกเลือก</p>
+                <input type="file" id="file" class="hidden" />
+                <p id="fileName" class="mt-2 text-xs text-green-500"></p>
+            </div>
+
+            <!-- Form -->
+            <div class="grid gap-4 mt-6">
+                <input
+                    id="words"
+                    type="number"
+                    value="1"
+                    min="1"
+                    class="px-3 py-2 border rounded-lg dark:bg-gray-700"
+                    placeholder="Words per line"
+                />
+
+                <select id="format" class="px-3 py-2 border rounded-lg dark:bg-gray-700">
+                    <option value="txt">TXT</option>
+                    <option value="srt">SRT</option>
+                </select>
+
+                <select id="model" class="px-3 py-2 border rounded-lg dark:bg-gray-700">
+                    <option value="base">base</option>
+                    <option value="small">small</option>
+                    <option value="medium">medium</option>
+                </select>
+
+                <!-- 🔥 NEW: language -->
+                <select id="language" class="px-3 py-2 border rounded-lg dark:bg-gray-700">
+                    <option value="auto">Auto Detect</option>
+                    <option value="th">Thai</option>
+                    <option value="en">English</option>
+                    <option value="ja">Japanese</option>
+                    <option value="zh">Chinese</option>
+                </select>
+            </div>
+
+            <!-- Button -->
+            <button onclick="upload()" id="btn" class="w-full mt-6 bg-blue-500 text-white py-2 rounded-lg">Upload</button>
+
+            <!-- Progress -->
+            <div id="progressBar" class="hidden w-full bg-gray-200 rounded-full h-2 mt-4">
+                <div id="progressFill" class="bg-blue-500 h-2 rounded-full w-0 transition-all"></div>
+            </div>
+
+            <!-- Status -->
+            <div id="status" class="mt-2 text-sm text-gray-600"></div>
+
+            <!-- Download -->
+            <a id="download" class="hidden text-blue-500 mt-2 block" target="_blank"> Download </a>
+
+            <!-- Preview -->
+            <pre id="preview" class="mt-4 bg-gray-50 dark:bg-gray-700 p-3 rounded text-xs max-h-40 overflow-auto"></pre>
+        </div>
+
+        <script>
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('file');
+            const fileName = document.getElementById('fileName');
+
+            let selectedFile = null;
+
+            // dark mode
+            function toggleDark() {
+                document.documentElement.classList.toggle('dark');
+            }
+
+            // click select
+            dropzone.onclick = () => fileInput.click();
+
+            // drag
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('border-blue-400');
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('border-blue-400');
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-blue-400');
+
+                selectedFile = e.dataTransfer.files[0];
+
+                const dt = new DataTransfer();
+                dt.items.add(selectedFile);
+                fileInput.files = dt.files;
+
+                fileName.innerText = selectedFile.name;
+            });
+
+            // change
+            fileInput.addEventListener('change', () => {
+                selectedFile = fileInput.files[0];
+                if (selectedFile) {
+                    fileName.innerText = selectedFile.name;
+                }
+            });
+
+            // upload
+            async function upload() {
+                if (!selectedFile) {
+                    alert('เลือกไฟล์ก่อน');
+                    return;
+                }
+
+                const btn = document.getElementById('btn');
+                const progressBar = document.getElementById('progressBar');
+                const progressFill = document.getElementById('progressFill');
+                const status = document.getElementById('status');
+                const download = document.getElementById('download');
+                const preview = document.getElementById('preview');
+
+                const words = document.getElementById('words').value;
+                const format = document.getElementById('format').value;
+                const model = document.getElementById('model').value;
+                const language = document.getElementById('language').value;
+
+                btn.disabled = true;
+                progressBar.classList.remove('hidden');
+                progressFill.style.width = '20%';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', selectedFile);
+                    formData.append('words_per_line', words);
+                    formData.append('format_type', format);
+                    formData.append('model_size', model);
+                    formData.append('language', language);
+
+                    const res = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    const data = await res.json();
+
+                    progressFill.style.width = '100%';
+                    status.innerText = 'เสร็จแล้ว';
+
+                    download.href = data.download_url;
+                    download.classList.remove('hidden');
+
+                    const text = await (await fetch(data.download_url)).text();
+                    preview.innerText = text.substring(0, 1000);
+                } catch (e) {
+                    status.innerText = 'error';
+                }
+
+                btn.disabled = false;
+            }
+        </script>
+    </body>
+</html>
