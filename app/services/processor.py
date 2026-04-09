@@ -1,5 +1,6 @@
 import os
 import re
+from app.core import config
 
 def is_thai(text):
     return bool(re.search('[\u0e00-\u0e7f]', text))
@@ -39,51 +40,31 @@ def process_words(result, words_per_line=1, format_type="txt", file_id="output")
                 if len(buffer) >= words_per_line:
                     f.write(join_words(buffer) + "\n")
                     buffer = []
+            # Write remaining buffer
+            if buffer:
+                f.write(join_words(buffer) + "\n")
 
     elif format_type == "srt":
         with open(output_file, "w", encoding="utf-8") as f:
-            for i in range(len(words)):
-                current_word = words[i]
-                start_time = current_word["start"]
+            idx = 1
+            for i in range(0, len(words), words_per_line):
+                chunk = words[i : i + words_per_line]
+                if not chunk: continue
                 
-                # Gapless logic: If it's 1 word per line, extend end time to the next word's start
+                start = chunk[0]["start"]
+                end = chunk[-1]["end"]
+                
+                # Fill gap for smoother video experience if 1 word per line
                 if words_per_line == 1 and i < len(words) - 1:
                     next_start = words[i+1]["start"]
-                    # If the gap is less than 0.5s, fill it to make it smooth
-                    if next_start - current_word["end"] < 0.5:
-                        end_time = next_start
-                    else:
-                        end_time = current_word["end"]
-                else:
-                    # For multi-word segments, we'll group them as before
-                    # But if user wants exactly 1 word per line, this part won't be hit for grouping
-                    end_time = current_word["end"]
-
-                # Note: The grouping logic for words_per_line > 1 needs to be slightly different 
-                # to handle the timestamps correctly. Let's refine it.
-
-            # Refined SRT logic for both 1-word and N-words
-            f.close() # Close and reopen for clean write
-            with open(output_file, "w", encoding="utf-8") as f:
-                idx = 1
-                for i in range(0, len(words), words_per_line):
-                    chunk = words[i : i + words_per_line]
-                    if not chunk: continue
-                    
-                    start = chunk[0]["start"]
-                    end = chunk[-1]["end"]
-                    
-                    # Fill gap for smoother video experience if 1 word per line
-                    if words_per_line == 1 and i < len(words) - 1:
-                        next_start = words[i+1]["start"]
-                        if next_start - end < 0.5:
-                            end = next_start
-                    
-                    text = join_words([w["word"].strip() for w in chunk])
-                    
-                    f.write(f"{idx}\n")
-                    f.write(f"{format_time(start)} --> {format_time(end)}\n")
-                    f.write(f"{text}\n\n")
-                    idx += 1
+                    if next_start - end < 0.5:
+                        end = next_start
+                
+                text = join_words([w["word"].strip() for w in chunk])
+                
+                f.write(f"{idx}\n")
+                f.write(f"{format_time(start)} --> {format_time(end)}\n")
+                f.write(f"{text}\n\n")
+                idx += 1
 
     return output_file

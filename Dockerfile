@@ -2,12 +2,16 @@ FROM pytorch/pytorch:latest
 
 WORKDIR /app
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /app/static /app/input /app/output
 
 COPY requirements.txt .
 
 RUN pip install --upgrade pip setuptools wheel
-
 RUN pip install -r requirements.txt
 
 # Pre-download models to cache them in the image

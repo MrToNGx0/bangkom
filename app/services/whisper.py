@@ -38,24 +38,24 @@ def load_vocab():
     return ", ".join(lines)
 
 
-def transcribe(
+def transcribe_gen(
     path,
     model_size="base",
     language="auto",
     word_timestamps=True
 ):
+    """
+    Generator version of transcribe to report progress
+    """
     model = get_model(model_size)
-    
-    # Load custom vocabulary for initial prompt
     custom_vocab = load_vocab()
     
     prompt = "ภาษาไทย, พูดไทย, Thai language, transcribe correctly."
     if custom_vocab:
         prompt = f"{prompt} Keywords: {custom_vocab}"
 
-    print(f"🚀 Transcribing with Faster-Whisper | {model_size} | language: {language}")
+    print(f"🚀 Transcribing with Faster-Whisper | {model_size}")
 
-    # Faster-whisper transcribe returns (segments, info)
     segments_gen, info = model.transcribe(
         path,
         language=None if language == "auto" else language,
@@ -63,13 +63,17 @@ def transcribe(
         word_timestamps=word_timestamps,
         initial_prompt=prompt,
         condition_on_previous_text=False,
-        vad_filter=True,  # Built-in VAD to reduce hallucinations
+        vad_filter=True,
         vad_parameters=dict(min_silence_duration_ms=500),
     )
 
-    # Convert generator to list of dicts to match previous output format for processor.py
+    total_duration = info.duration
     segments = []
+
     for s in segments_gen:
+        # Calculate progress based on segment end time
+        progress = min(int((s.end / total_duration) * 100), 99)
+        
         seg_dict = {
             "start": s.start,
             "end": s.end,
@@ -83,6 +87,10 @@ def transcribe(
                     "end": w.end,
                     "word": w.word
                 })
+        
         segments.append(seg_dict)
+        # Yield current progress and segments so far
+        yield progress, None
 
-    return {"segments": segments}
+    # Final yield with full result
+    yield 100, {"segments": segments}
