@@ -1,7 +1,14 @@
 <!doctype html>
-<html>
+<html lang="th">
     <head>
-        <title>bangkom</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bangkom AI • Professional Subtitle Tool</title>
+
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 
         <!-- Tailwind -->
         <script src="https://cdn.tailwindcss.com"></script>
@@ -10,140 +17,338 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
         <script>
-            tailwind.config = { darkMode: 'class' };
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['"Plus Jakarta Sans"', 'Sarabun', 'sans-serif'],
+                        },
+                        colors: {
+                            brand: {
+                                50: '#f5f7ff',
+                                100: '#ebf0fe',
+                                200: '#dae3fd',
+                                300: '#bcc9fb',
+                                400: '#94a5f7',
+                                500: '#6373f1',
+                                600: '#464de7',
+                                700: '#393ccf',
+                                800: '#3234a8',
+                                900: '#2d2f86',
+                                950: '#1d1e4f',
+                            },
+                        }
+                    }
+                }
+            };
         </script>
+
+        <style>
+            body {
+                background-image: 
+                    radial-gradient(at 0% 0%, hsla(230,100%,95%,1) 0, transparent 50%), 
+                    radial-gradient(at 50% 0%, hsla(240,100%,98%,1) 0, transparent 50%), 
+                    radial-gradient(at 100% 0%, hsla(250,100%,95%,1) 0, transparent 50%);
+            }
+            .dark body {
+                background-image: 
+                    radial-gradient(at 0% 0%, hsla(230,30%,10%,1) 0, transparent 50%), 
+                    radial-gradient(at 50% 0%, hsla(240,30%,8%,1) 0, transparent 50%), 
+                    radial-gradient(at 100% 0%, hsla(250,30%,10%,1) 0, transparent 50%);
+                background-color: #020617;
+            }
+            .glass-card {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+            }
+            .dark .glass-card {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            .custom-shadow {
+                box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
+            }
+            .dark .custom-shadow {
+                box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+            .btn-gradient {
+                background: linear-gradient(135deg, #6373f1 0%, #464de7 100%);
+            }
+            .btn-gradient:hover {
+                background: linear-gradient(135deg, #464de7 0%, #393ccf 100%);
+            }
+            .preview-scroll::-webkit-scrollbar {
+                width: 5px;
+            }
+            .preview-scroll::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .preview-scroll::-webkit-scrollbar-thumb {
+                background: rgba(148, 165, 247, 0.3);
+                border-radius: 10px;
+            }
+            .dropzone-active {
+                border-color: #6373f1 !important;
+                background: rgba(99, 115, 241, 0.05) !important;
+                transform: scale(1.01);
+            }
+            .animate-float {
+                animation: float 3s ease-in-out infinite;
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-5px); }
+            }
+        </style>
     </head>
 
-    <body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center transition">
-        <div class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">🎧 Bangkom Subtitle Tool</h1>
+    <body class="min-h-screen font-sans transition-colors duration-500 overflow-x-hidden">
+        <div class="container mx-auto px-4 py-12 md:py-20 flex items-center justify-center min-h-screen">
+            <div class="w-full max-w-3xl glass-card rounded-[2.5rem] custom-shadow p-8 md:p-12 transition-all duration-500 relative overflow-hidden">
+                
+                <!-- Background Decorative Elements -->
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <!-- Toggle -->
-                <button onclick="toggleDark()" class="relative w-14 h-7 bg-gray-300 dark:bg-blue-500 rounded-full">
-                    <div id="toggleDot" class="absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform"></div>
-                </button>
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-brand-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30 animate-float">
+                            <i class="fa-solid fa-microphone-lines text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                                Bangkom <span class="text-brand-500 text-sm font-bold bg-brand-50 dark:bg-brand-500/10 px-2 py-1 rounded-lg">AI</span>
+                            </h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Professional Subtitle Intelligence</p>
+                        </div>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" onclick="toggleDark()" class="bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all duration-300 shadow-sm">
+                        <i id="themeIcon" class="fa-solid fa-sun text-amber-500 dark:text-indigo-400 text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Main Content -->
+                <div class="space-y-10 relative z-10">
+                    
+                    <!-- Dropzone -->
+                    <div
+                        id="dropzone"
+                        class="group relative border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] p-12 text-center cursor-pointer hover:border-brand-400 transition-all duration-500 bg-white/30 dark:bg-slate-900/20 shadow-inner"
+                    >
+                        <div class="relative z-10 space-y-4">
+                            <div class="w-20 h-20 bg-brand-50 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-500">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand-500"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-xl font-bold text-slate-800 dark:text-slate-200">Drop your media here</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Audio or Video files (MP4, MP3, WAV, etc.)</p>
+                            </div>
+                            <div id="fileName" class="hidden inline-flex items-center gap-2 px-4 py-2 bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 rounded-full text-sm font-bold animate-in zoom-in duration-300"></div>
+                        </div>
+                        <input type="file" id="file" class="hidden" accept="audio/*,video/*" />
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50/50 dark:bg-slate-800/30 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800/50">
+                        
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-layer-group text-brand-500"></i> Words Per Line
+                            </label>
+                            <input
+                                id="words"
+                                type="number"
+                                value="1"
+                                min="1"
+                                class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all dark:text-white font-semibold"
+                            />
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-file-lines text-brand-500"></i> Export Format
+                            </label>
+                            <select id="format" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none appearance-none dark:text-white font-semibold cursor-pointer">
+                                <option value="srt">SRT (Professional Subtitles)</option>
+                                <option value="txt">TXT (Plain Transcript)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-microchip text-brand-500"></i> AI Model
+                            </label>
+                            <select id="model" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none appearance-none dark:text-white font-semibold cursor-pointer">
+                                <option value="large-v3-turbo" selected>Large V3 Turbo (Recommended)</option>
+                                <option value="large-v3">Large V3 (Best Accuracy)</option>
+                                <option value="medium">Medium (Stable)</option>
+                                <option value="small">Small (Fast)</option>
+                                <option value="base">Base (Lightweight)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-globe text-brand-500"></i> Source Language
+                            </label>
+                            <select id="language" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none appearance-none dark:text-white font-semibold cursor-pointer">
+                                <option value="auto">Auto Detect Language</option>
+                                <option value="th">Thai (ภาษาไทย)</option>
+                                <option value="en">English (US/UK)</option>
+                                <option value="ja">Japanese (日本語)</option>
+                                <option value="zh">Chinese (中文)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="upload()" id="btn" class="flex-[3] btn-gradient text-white font-bold py-5 rounded-[1.5rem] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-brand-500/20 disabled:opacity-50">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Generate Subtitles</span>
+                        </button>
+                        <button onclick="cancel()" id="stopBtn" class="hidden flex-1 bg-white dark:bg-slate-800 text-rose-500 border-2 border-rose-100 dark:border-rose-900/30 font-bold py-5 rounded-[1.5rem] hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-300 flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-hand-stop"></i>
+                            Stop
+                        </button>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div id="progressSection" class="hidden space-y-4 p-8 bg-brand-50/50 dark:bg-brand-950/20 rounded-[2rem] border border-brand-100 dark:border-brand-900/20">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></div>
+                                <span id="status" class="text-sm font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider">Processing...</span>
+                            </div>
+                            <span id="percentText" class="text-lg font-black text-brand-600">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-4 p-1 overflow-hidden">
+                            <div id="progressFill" class="bg-brand-500 h-full w-0 transition-all duration-700 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Result Section -->
+                    <div id="resultSection" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <div class="flex items-center justify-between px-2">
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Live Preview</h3>
+                            <a id="download" href="#" class="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-600 text-white font-bold text-sm rounded-xl hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20">
+                                <i class="fa-solid fa-download"></i> Download File
+                            </a>
+                        </div>
+                        <div class="relative group">
+                            <div class="absolute -inset-1 bg-gradient-to-r from-brand-500/20 to-indigo-500/20 rounded-[2rem] blur opacity-50 group-hover:opacity-100 transition duration-1000"></div>
+                            <pre id="preview" class="preview-scroll relative bg-slate-900 dark:bg-black text-slate-300 p-8 rounded-[1.8rem] text-[13px] leading-relaxed max-h-72 overflow-auto border border-slate-800 font-mono"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        <span>Engine: Faster-Whisper</span>
+                        <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                        <span>UI v2.5 Professional</span>
+                    </div>
+                    <button onclick="manualCleanup()" class="group flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-rose-500 transition-all uppercase tracking-[0.2em]">
+                        <i class="fa-solid fa-trash-can group-hover:shake"></i>
+                        Clear Workstation
+                    </button>
+                </div>
             </div>
-
-            <!-- Dropzone -->
-            <div
-                id="dropzone"
-                class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 transition"
-            >
-                <i class="fa-solid fa-upload text-2xl text-gray-500"></i>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">ลากไฟล์มาวาง หรือคลิกเลือก</p>
-                <input type="file" id="file" class="hidden" />
-                <p id="fileName" class="mt-2 text-xs text-green-500"></p>
-            </div>
-
-            <!-- Form -->
-            <div class="grid gap-4 mt-6">
-                <input
-                    id="words"
-                    type="number"
-                    value="1"
-                    min="1"
-                    class="px-3 py-2 border rounded-lg dark:bg-gray-700"
-                    placeholder="Words per line"
-                />
-
-                <select id="format" class="px-3 py-2 border rounded-lg dark:bg-gray-700">
-                    <option value="txt">TXT</option>
-                    <option value="srt">SRT</option>
-                </select>
-
-                <select id="model" class="px-3 py-2 border rounded-lg dark:bg-gray-700">
-                    <option value="base">base</option>
-                    <option value="small">small</option>
-                    <option value="medium">medium</option>
-                </select>
-
-                <!-- 🔥 NEW: language -->
-                <select id="language" class="px-3 py-2 border rounded-lg dark:bg-gray-700">
-                    <option value="auto">Auto Detect</option>
-                    <option value="th">Thai</option>
-                    <option value="en">English</option>
-                    <option value="ja">Japanese</option>
-                    <option value="zh">Chinese</option>
-                </select>
-            </div>
-
-            <!-- Button -->
-            <button onclick="upload()" id="btn" class="w-full mt-6 bg-blue-500 text-white py-2 rounded-lg">Upload</button>
-
-            <!-- Progress -->
-            <div id="progressBar" class="hidden w-full bg-gray-200 rounded-full h-2 mt-4">
-                <div id="progressFill" class="bg-blue-500 h-2 rounded-full w-0 transition-all"></div>
-            </div>
-
-            <!-- Status -->
-            <div id="status" class="mt-2 text-sm text-gray-600"></div>
-
-            <!-- Download -->
-            <a id="download" class="hidden text-blue-500 mt-2 block" target="_blank"> Download </a>
-
-            <!-- Preview -->
-            <pre id="preview" class="mt-4 bg-gray-50 dark:bg-gray-700 p-3 rounded text-xs max-h-40 overflow-auto"></pre>
         </div>
 
         <script>
             const dropzone = document.getElementById('dropzone');
             const fileInput = document.getElementById('file');
             const fileName = document.getElementById('fileName');
+            const toggleDot = document.getElementById('toggleDot');
+            const themeIcon = document.getElementById('themeIcon');
 
             let selectedFile = null;
+            let currentFileId = null;
+            let eventSource = null;
 
-            // dark mode
-            function toggleDark() {
-                document.documentElement.classList.toggle('dark');
+            // Theme Management
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateThemeUI(true);
             }
 
-            // click select
+            function toggleDark() {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.theme = isDark ? 'dark' : 'light';
+                updateThemeUI(isDark);
+            }
+
+            function updateThemeUI(isDark) {
+                const icon = document.getElementById('themeIcon');
+                if (isDark) {
+                    icon.className = 'fa-solid fa-moon text-indigo-400 text-lg';
+                } else {
+                    icon.className = 'fa-solid fa-sun text-amber-500 text-lg';
+                }
+            }
+
+            // Dropzone & File Handling
             dropzone.onclick = () => fileInput.click();
-
-            // drag
-            dropzone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropzone.classList.add('border-blue-400');
-            });
-
-            dropzone.addEventListener('dragleave', () => {
-                dropzone.classList.remove('border-blue-400');
-            });
-
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dropzone-active'); });
+            dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dropzone-active'); });
             dropzone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropzone.classList.remove('border-blue-400');
-
+                dropzone.classList.remove('dropzone-active');
                 selectedFile = e.dataTransfer.files[0];
-
-                const dt = new DataTransfer();
-                dt.items.add(selectedFile);
-                fileInput.files = dt.files;
-
-                fileName.innerText = selectedFile.name;
+                handleFileSelect();
             });
-
-            // change
             fileInput.addEventListener('change', () => {
                 selectedFile = fileInput.files[0];
-                if (selectedFile) {
-                    fileName.innerText = selectedFile.name;
-                }
+                handleFileSelect();
             });
 
-            // upload
+            function handleFileSelect() {
+                if (selectedFile) {
+                    fileName.classList.remove('hidden');
+                    fileName.innerHTML = `<i class="fa-solid fa-file-audio text-xs"></i><span>${selectedFile.name}</span>`;
+                }
+            }
+
+            async function manualCleanup() {
+                if (!confirm("Confirm clearing all temporary data from the workstation?")) return;
+                try {
+                    await fetch('/api/cleanup', { method: 'POST' });
+                    alert("Workstation cleared successfully.");
+                } catch (e) {
+                    alert("Cleanup failed.");
+                }
+            }
+
+            async function cancel() {
+                if (!currentFileId) return;
+                const stopBtn = document.getElementById('stopBtn');
+                stopBtn.disabled = true;
+                stopBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2 text-xs"></i>Stopping...`;
+                try {
+                    await fetch(`/api/cancel/${currentFileId}`, { method: 'POST' });
+                } catch (e) { console.error(e); }
+            }
+
             async function upload() {
                 if (!selectedFile) {
-                    alert('เลือกไฟล์ก่อน');
+                    alert('Please select a media file first.');
                     return;
                 }
 
                 const btn = document.getElementById('btn');
-                const progressBar = document.getElementById('progressBar');
+                const stopBtn = document.getElementById('stopBtn');
+                const progressSection = document.getElementById('progressSection');
                 const progressFill = document.getElementById('progressFill');
+                const percentText = document.getElementById('percentText');
                 const status = document.getElementById('status');
+                const resultSection = document.getElementById('resultSection');
                 const download = document.getElementById('download');
                 const preview = document.getElementById('preview');
 
@@ -152,38 +357,84 @@
                 const model = document.getElementById('model').value;
                 const language = document.getElementById('language').value;
 
+                // Reset UI
                 btn.disabled = true;
-                progressBar.classList.remove('hidden');
-                progressFill.style.width = '20%';
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Initializing...`;
+                stopBtn.classList.remove('hidden');
+                stopBtn.disabled = false;
+                stopBtn.innerText = 'Stop';
+
+                progressSection.classList.remove('hidden');
+                resultSection.classList.add('hidden');
+                progressFill.style.width = '2%';
+                percentText.innerText = '2%';
+                status.innerText = 'Uploading payload...';
 
                 try {
                     const formData = new FormData();
                     formData.append('file', selectedFile);
-                    formData.append('words_per_line', words);
-                    formData.append('format_type', format);
-                    formData.append('model_size', model);
-                    formData.append('language', language);
 
-                    const res = await fetch('/upload', {
-                        method: 'POST',
-                        body: formData,
-                    });
+                    const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                    if (!uploadRes.ok) throw new Error('Upload link failed');
+                    
+                    const { file_id } = await uploadRes.json();
+                    currentFileId = file_id;
+                    
+                    const streamUrl = `/api/process/${file_id}?words_per_line=${words}&format_type=${format}&model_size=${model}&language=${language}`;
+                    eventSource = new EventSource(streamUrl);
 
-                    const data = await res.json();
+                    let isDone = false;
+                    eventSource.onmessage = async (event) => {
+                        const data = JSON.parse(event.data);
 
-                    progressFill.style.width = '100%';
-                    status.innerText = 'เสร็จแล้ว';
+                        if (data.status === 'cancelled') {
+                            status.innerText = 'Process halted by user.';
+                            eventSource.close();
+                            resetUI();
+                        } else if (data.error) {
+                            status.innerText = 'System Error: ' + data.error;
+                            eventSource.close();
+                            resetUI();
+                        } else if (data.progress < 100) {
+                            status.innerText = data.status || `Processing... (${data.progress}%)`;
+                            progressFill.style.width = `${data.progress}%`;
+                            percentText.innerText = `${data.progress}%`;
+                        } else if (data.progress === 100 && data.download_url) {
+                            isDone = true;
+                            status.innerText = 'Generation Complete';
+                            progressFill.style.width = '100%';
+                            percentText.innerText = '100%';
+                            
+                            download.href = data.download_url;
+                            resultSection.classList.remove('hidden');
 
-                    download.href = data.download_url;
-                    download.classList.remove('hidden');
+                            const previewRes = await fetch(data.download_url);
+                            const text = await previewRes.text();
+                            preview.innerText = text.substring(0, 3000);
+                            
+                            eventSource.close();
+                            resetUI();
+                        }
+                    };
 
-                    const text = await (await fetch(data.download_url)).text();
-                    preview.innerText = text.substring(0, 1000);
+                    eventSource.onerror = () => {
+                        eventSource.close();
+                        resetUI();
+                        if (!isDone) status.innerText = 'Connection lost. Retrying...';
+                    };
+
                 } catch (e) {
-                    status.innerText = 'error';
+                    status.innerText = 'Error: ' + e.message;
+                    resetUI();
                 }
+            }
 
+            function resetUI() {
+                const btn = document.getElementById('btn');
                 btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span>Generate Subtitles</span>`;
+                document.getElementById('stopBtn').classList.add('hidden');
+                currentFileId = null;
             }
         </script>
     </body>
