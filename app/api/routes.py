@@ -1,10 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, StreamingResponse
 import shutil
 import os
 import uuid
 import json
 import asyncio
+import time
 
 from app.core import config
 from app.services import whisper, processor
@@ -16,12 +17,38 @@ UPLOADED_FILES = {}
 CANCEL_REQUESTS = set()
 
 
+def cleanup_old_files(max_age_seconds=3600 * 24):
+    """
+    Remove files in input and output directories older than max_age_seconds (default 24h)
+    """
+    now = time.time()
+    for directory in [config.INPUT_DIR, config.OUTPUT_DIR]:
+        if not os.path.exists(directory):
+            continue
+        for f in os.listdir(directory):
+            f_path = os.path.join(directory, f)
+            # Skip hidden files
+            if f.startswith('.'):
+                continue
+            if os.stat(f_path).st_mtime < now - max_age_seconds:
+                try:
+                    if os.path.isfile(f_path):
+                        os.remove(f_path)
+                        print(f"🗑️ Deleted old file: {f}")
+                except Exception as e:
+                    print(f"⚠️ Failed to delete {f}: {e}")
+
+
 @router.post("/upload")
 async def upload(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...)
 ):
     if not file.filename:
         raise HTTPException(status_code=400, detail="no file uploaded")
+
+    # Run cleanup in background periodically on each upload
+    background_tasks.add_task(cleanup_old_files)
 
     file_id = str(uuid.uuid4())
     safe_name = "".join([c if c.isalnum() or c in "._-" else "_" for c in file.filename])
@@ -39,6 +66,13 @@ async def upload(
 async def cancel_processing(file_id: str):
     CANCEL_REQUESTS.add(file_id)
     return {"status": "cancel_requested"}
+
+
+@router.post("/cleanup")
+async def manual_cleanup():
+    """Endpoint for manual cleanup from UI"""
+    cleanup_old_files(max_age_seconds=0) # Delete ALL files
+    return {"status": "all_files_deleted"}
 
 
 @router.get("/process/{file_id}")

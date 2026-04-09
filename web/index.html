@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bangkom Subtitle Tool</title>
+        <title>Bangkom AI • Professional Subtitle Tool</title>
 
         <!-- Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
 
         <!-- Tailwind -->
         <script src="https://cdn.tailwindcss.com"></script>
@@ -22,170 +22,242 @@
                 theme: {
                     extend: {
                         fontFamily: {
-                            sans: ['Inter', 'Sarabun', 'sans-serif'],
+                            sans: ['"Plus Jakarta Sans"', 'Sarabun', 'sans-serif'],
                         },
+                        colors: {
+                            brand: {
+                                50: '#f5f7ff',
+                                100: '#ebf0fe',
+                                200: '#dae3fd',
+                                300: '#bcc9fb',
+                                400: '#94a5f7',
+                                500: '#6373f1',
+                                600: '#464de7',
+                                700: '#393ccf',
+                                800: '#3234a8',
+                                900: '#2d2f86',
+                                950: '#1d1e4f',
+                            },
+                        }
                     }
                 }
             };
         </script>
 
         <style>
-            .glass {
-                background: rgba(255, 255, 255, 0.7);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+            body {
+                background-image: 
+                    radial-gradient(at 0% 0%, hsla(230,100%,95%,1) 0, transparent 50%), 
+                    radial-gradient(at 50% 0%, hsla(240,100%,98%,1) 0, transparent 50%), 
+                    radial-gradient(at 100% 0%, hsla(250,100%,95%,1) 0, transparent 50%);
             }
-            .dark .glass {
-                background: rgba(30, 41, 59, 0.7);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+            .dark body {
+                background-image: 
+                    radial-gradient(at 0% 0%, hsla(230,30%,10%,1) 0, transparent 50%), 
+                    radial-gradient(at 50% 0%, hsla(240,30%,8%,1) 0, transparent 50%), 
+                    radial-gradient(at 100% 0%, hsla(250,30%,10%,1) 0, transparent 50%);
+                background-color: #020617;
             }
-            .toggle-dot {
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            .glass-card {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
             }
-            input:checked ~ .toggle-dot {
-                transform: translateX(100%);
+            .dark .glass-card {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            .custom-shadow {
+                box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.05);
+            }
+            .dark .custom-shadow {
+                box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+            .btn-gradient {
+                background: linear-gradient(135deg, #6373f1 0%, #464de7 100%);
+            }
+            .btn-gradient:hover {
+                background: linear-gradient(135deg, #464de7 0%, #393ccf 100%);
             }
             .preview-scroll::-webkit-scrollbar {
-                width: 6px;
+                width: 5px;
+            }
+            .preview-scroll::-webkit-scrollbar-track {
+                background: transparent;
             }
             .preview-scroll::-webkit-scrollbar-thumb {
-                background-color: rgba(156, 163, 175, 0.5);
+                background: rgba(148, 165, 247, 0.3);
                 border-radius: 10px;
+            }
+            .dropzone-active {
+                border-color: #6373f1 !important;
+                background: rgba(99, 115, 241, 0.05) !important;
+                transform: scale(1.01);
+            }
+            .animate-float {
+                animation: float 3s ease-in-out infinite;
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-5px); }
             }
         </style>
     </head>
 
-    <body class="bg-slate-50 dark:bg-slate-950 min-h-screen font-sans transition-colors duration-300">
-        <div class="container mx-auto px-4 py-12 flex items-center justify-center min-h-screen">
-            <div class="w-full max-w-2xl glass dark:glass rounded-3xl shadow-2xl p-8 transition-all duration-300 border border-slate-200 dark:border-slate-800">
+    <body class="min-h-screen font-sans transition-colors duration-500 overflow-x-hidden">
+        <div class="container mx-auto px-4 py-12 md:py-20 flex items-center justify-center min-h-screen">
+            <div class="w-full max-w-3xl glass-card rounded-[2.5rem] custom-shadow p-8 md:p-12 transition-all duration-500 relative overflow-hidden">
                 
+                <!-- Background Decorative Elements -->
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
                 <!-- Header -->
-                <div class="flex justify-between items-center mb-10">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-indigo-600 p-3 rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-none">
-                            <i class="fa-solid fa-headphones-simple text-white text-xl"></i>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 relative z-10">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-brand-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30 animate-float">
+                            <i class="fa-solid fa-microphone-lines text-white text-2xl"></i>
                         </div>
                         <div>
-                            <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Bangkom</h1>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">AI Subtitle Tool</p>
+                            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                                Bangkom <span class="text-brand-500 text-sm font-bold bg-brand-50 dark:bg-brand-500/10 px-2 py-1 rounded-lg">AI</span>
+                            </h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Professional Subtitle Intelligence</p>
                         </div>
                     </div>
 
                     <!-- Theme Toggle -->
-                    <button id="themeToggle" onclick="toggleDark()" class="w-14 h-8 bg-slate-200 dark:bg-slate-700 rounded-full p-1 relative transition-colors duration-300">
-                        <div id="toggleDot" class="w-6 h-6 bg-white dark:bg-indigo-400 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center">
-                            <i id="themeIcon" class="fa-solid fa-sun text-[10px] text-amber-500 dark:text-white"></i>
-                        </div>
+                    <button id="themeToggle" onclick="toggleDark()" class="bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all duration-300 shadow-sm">
+                        <i id="themeIcon" class="fa-solid fa-sun text-amber-500 dark:text-indigo-400 text-lg"></i>
                     </button>
                 </div>
 
-                <!-- Dropzone -->
-                <div
-                    id="dropzone"
-                    class="group relative border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-10 text-center cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/20 transition-all duration-300"
-                >
-                    <div class="relative z-10">
-                        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 group-hover:text-indigo-500"></i>
+                <!-- Main Content -->
+                <div class="space-y-10 relative z-10">
+                    
+                    <!-- Dropzone -->
+                    <div
+                        id="dropzone"
+                        class="group relative border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] p-12 text-center cursor-pointer hover:border-brand-400 transition-all duration-500 bg-white/30 dark:bg-slate-900/20 shadow-inner"
+                    >
+                        <div class="relative z-10 space-y-4">
+                            <div class="w-20 h-20 bg-brand-50 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-500">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand-500"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-xl font-bold text-slate-800 dark:text-slate-200">Drop your media here</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Audio or Video files (MP4, MP3, WAV, etc.)</p>
+                            </div>
+                            <div id="fileName" class="hidden inline-flex items-center gap-2 px-4 py-2 bg-brand-100 dark:bg-brand-900/50 text-brand-700 dark:text-brand-300 rounded-full text-sm font-bold animate-in zoom-in duration-300"></div>
                         </div>
-                        <p class="text-slate-600 dark:text-slate-300 font-medium">ลากไฟล์เสียงหรือวิดีโอมาวางที่นี่</p>
-                        <p class="text-xs text-slate-400 mt-1">หรือคลิกเพื่อเลือกไฟล์จากเครื่อง</p>
-                        <p id="fileName" class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400 truncate"></p>
+                        <input type="file" id="file" class="hidden" accept="audio/*,video/*" />
                     </div>
-                    <input type="file" id="file" class="hidden" accept="audio/*,video/*" />
-                </div>
 
-                <!-- Settings Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-8">
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Words Per Line</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-align-left absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <!-- Settings -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-slate-50/50 dark:bg-slate-800/30 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800/50">
+                        
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-layer-group text-brand-500"></i> Words Per Line
+                            </label>
                             <input
                                 id="words"
                                 type="number"
                                 value="1"
                                 min="1"
-                                class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
+                                class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-all dark:text-white font-semibold"
                             />
                         </div>
-                    </div>
 
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Output Format</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-file-export absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <select id="format" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none dark:text-white transition-all">
-                                <option value="txt">TXT (Plain Text)</option>
-                                <option value="srt">SRT (Subtitles)</option>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-file-lines text-brand-500"></i> Export Format
+                            </label>
+                            <select id="format" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none appearance-none dark:text-white font-semibold cursor-pointer">
+                                <option value="srt">SRT (Professional Subtitles)</option>
+                                <option value="txt">TXT (Plain Transcript)</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Whisper Model</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-brain absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <select id="model" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none dark:text-white transition-all">
-                                <option value="base">Base (Fastest)</option>
-                                <option value="small">Small</option>
-                                <option value="medium">Medium (Stable)</option>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-microchip text-brand-500"></i> AI Model
+                            </label>
+                            <select id="model" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none appearance-none dark:text-white font-semibold cursor-pointer">
                                 <option value="large-v3-turbo" selected>Large V3 Turbo (Recommended)</option>
                                 <option value="large-v3">Large V3 (Best Accuracy)</option>
+                                <option value="medium">Medium (Stable)</option>
+                                <option value="small">Small (Fast)</option>
+                                <option value="base">Base (Lightweight)</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">
+                                <i class="fa-solid fa-globe text-brand-500"></i> Source Language
+                            </label>
+                            <select id="language" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none appearance-none dark:text-white font-semibold cursor-pointer">
+                                <option value="auto">Auto Detect Language</option>
+                                <option value="th">Thai (ภาษาไทย)</option>
+                                <option value="en">English (US/UK)</option>
+                                <option value="ja">Japanese (日本語)</option>
+                                <option value="zh">Chinese (中文)</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase ml-1">Language</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-language absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                            <select id="language" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none dark:text-white transition-all">
-                                <option value="auto">Auto Detect</option>
-                                <option value="th">Thai</option>
-                                <option value="en">English</option>
-                                <option value="ja">Japanese</option>
-                                <option value="zh">Chinese</option>
-                            </select>
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="upload()" id="btn" class="flex-[3] btn-gradient text-white font-bold py-5 rounded-[1.5rem] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3 shadow-xl shadow-brand-500/20 disabled:opacity-50">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Generate Subtitles</span>
+                        </button>
+                        <button onclick="cancel()" id="stopBtn" class="hidden flex-1 bg-white dark:bg-slate-800 text-rose-500 border-2 border-rose-100 dark:border-rose-900/30 font-bold py-5 rounded-[1.5rem] hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all duration-300 flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-hand-stop"></i>
+                            Stop
+                        </button>
+                    </div>
+
+                    <!-- Progress Section -->
+                    <div id="progressSection" class="hidden space-y-4 p-8 bg-brand-50/50 dark:bg-brand-950/20 rounded-[2rem] border border-brand-100 dark:border-brand-900/20">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <div class="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></div>
+                                <span id="status" class="text-sm font-bold text-brand-900 dark:text-brand-300 uppercase tracking-wider">Processing...</span>
+                            </div>
+                            <span id="percentText" class="text-lg font-black text-brand-600">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-4 p-1 overflow-hidden">
+                            <div id="progressFill" class="bg-brand-500 h-full w-0 transition-all duration-700 rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Result Section -->
+                    <div id="resultSection" class="hidden space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <div class="flex items-center justify-between px-2">
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Live Preview</h3>
+                            <a id="download" href="#" class="inline-flex items-center gap-2 px-6 py-2.5 bg-brand-600 text-white font-bold text-sm rounded-xl hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20">
+                                <i class="fa-solid fa-download"></i> Download File
+                            </a>
+                        </div>
+                        <div class="relative group">
+                            <div class="absolute -inset-1 bg-gradient-to-r from-brand-500/20 to-indigo-500/20 rounded-[2rem] blur opacity-50 group-hover:opacity-100 transition duration-1000"></div>
+                            <pre id="preview" class="preview-scroll relative bg-slate-900 dark:bg-black text-slate-300 p-8 rounded-[1.8rem] text-[13px] leading-relaxed max-h-72 overflow-auto border border-slate-800 font-mono"></pre>
                         </div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="flex gap-3 mt-10">
-                    <button onclick="upload()" id="btn" class="flex-[2] bg-indigo-600 text-white font-bold py-3.5 rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 dark:shadow-none transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i class="fa-solid fa-play text-xs"></i>
-                        Start Transcription
+                <!-- Footer -->
+                <div class="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                        <span>Engine: Faster-Whisper</span>
+                        <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                        <span>UI v2.5 Professional</span>
+                    </div>
+                    <button onclick="manualCleanup()" class="group flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-rose-500 transition-all uppercase tracking-[0.2em]">
+                        <i class="fa-solid fa-trash-can group-hover:shake"></i>
+                        Clear Workstation
                     </button>
-                    <button onclick="cancel()" id="stopBtn" class="hidden flex-1 bg-rose-500 text-white font-bold py-3.5 rounded-2xl hover:bg-rose-600 transition-all duration-300 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-stop text-xs"></i>
-                        Stop
-                    </button>
-                </div>
-
-                <!-- Progress Section -->
-                <div id="progressSection" class="hidden mt-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800">
-                    <div class="flex justify-between items-end mb-3">
-                        <span id="status" class="text-sm font-semibold text-slate-600 dark:text-slate-300">Preparing...</span>
-                        <span id="percentText" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
-                        <div id="progressFill" class="bg-indigo-600 h-full w-0 transition-all duration-300 rounded-full shadow-[0_0_10px_rgba(79,70,229,0.5)]"></div>
-                    </div>
-                </div>
-
-                <!-- Result Section -->
-                <div id="resultSection" class="hidden mt-8 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest">Transcription Preview</h3>
-                        <a id="download" href="#" class="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-sm hover:underline" target="_blank">
-                            <i class="fa-solid fa-download"></i> Download Full File
-                        </a>
-                    </div>
-                    <div class="relative group">
-                        <pre id="preview" class="preview-scroll bg-slate-900 text-slate-300 p-5 rounded-2xl text-[11px] leading-relaxed max-h-56 overflow-auto border border-slate-800 font-mono"></pre>
-                        <div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-900 to-transparent rounded-b-2xl pointer-events-none"></div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -201,13 +273,10 @@
             let currentFileId = null;
             let eventSource = null;
 
-            // Initialize Theme
+            // Theme Management
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
                 updateThemeUI(true);
-            } else {
-                document.documentElement.classList.remove('dark');
-                updateThemeUI(false);
             }
 
             function toggleDark() {
@@ -217,22 +286,21 @@
             }
 
             function updateThemeUI(isDark) {
+                const icon = document.getElementById('themeIcon');
                 if (isDark) {
-                    toggleDot.style.transform = 'translateX(24px)';
-                    themeIcon.className = 'fa-solid fa-moon text-[10px] text-indigo-400';
+                    icon.className = 'fa-solid fa-moon text-indigo-400 text-lg';
                 } else {
-                    toggleDot.style.transform = 'translateX(0px)';
-                    themeIcon.className = 'fa-solid fa-sun text-[10px] text-amber-500';
+                    icon.className = 'fa-solid fa-sun text-amber-500 text-lg';
                 }
             }
 
-            // Dropzone Logic
+            // Dropzone & File Handling
             dropzone.onclick = () => fileInput.click();
-            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-indigo-500', 'bg-indigo-50/50'); });
-            dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('border-indigo-500', 'bg-indigo-50/50'); });
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dropzone-active'); });
+            dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dropzone-active'); });
             dropzone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                dropzone.classList.remove('border-indigo-500', 'bg-indigo-50/50');
+                dropzone.classList.remove('dropzone-active');
                 selectedFile = e.dataTransfer.files[0];
                 handleFileSelect();
             });
@@ -243,7 +311,18 @@
 
             function handleFileSelect() {
                 if (selectedFile) {
-                    fileName.innerHTML = `<i class="fa-solid fa-file-audio mr-2"></i>${selectedFile.name}`;
+                    fileName.classList.remove('hidden');
+                    fileName.innerHTML = `<i class="fa-solid fa-file-audio text-xs"></i><span>${selectedFile.name}</span>`;
+                }
+            }
+
+            async function manualCleanup() {
+                if (!confirm("Confirm clearing all temporary data from the workstation?")) return;
+                try {
+                    await fetch('/api/cleanup', { method: 'POST' });
+                    alert("Workstation cleared successfully.");
+                } catch (e) {
+                    alert("Cleanup failed.");
                 }
             }
 
@@ -251,18 +330,15 @@
                 if (!currentFileId) return;
                 const stopBtn = document.getElementById('stopBtn');
                 stopBtn.disabled = true;
-                stopBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Stopping...`;
-
+                stopBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2 text-xs"></i>Stopping...`;
                 try {
                     await fetch(`/api/cancel/${currentFileId}`, { method: 'POST' });
-                } catch (e) {
-                    console.error('Cancel failed', e);
-                }
+                } catch (e) { console.error(e); }
             }
 
             async function upload() {
                 if (!selectedFile) {
-                    alert('กรุณาเลือกไฟล์ก่อนเริ่มงานครับ');
+                    alert('Please select a media file first.');
                     return;
                 }
 
@@ -281,8 +357,9 @@
                 const model = document.getElementById('model').value;
                 const language = document.getElementById('language').value;
 
-                // UI Reset
+                // Reset UI
                 btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>Initializing...`;
                 stopBtn.classList.remove('hidden');
                 stopBtn.disabled = false;
                 stopBtn.innerText = 'Stop';
@@ -291,18 +368,14 @@
                 resultSection.classList.add('hidden');
                 progressFill.style.width = '2%';
                 percentText.innerText = '2%';
-                status.innerText = 'Uploading file...';
+                status.innerText = 'Uploading payload...';
 
                 try {
                     const formData = new FormData();
                     formData.append('file', selectedFile);
 
-                    const uploadRes = await fetch('/api/upload', {
-                        method: 'POST',
-                        body: formData,
-                    });
-
-                    if (!uploadRes.ok) throw new Error('Upload failed');
+                    const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+                    if (!uploadRes.ok) throw new Error('Upload link failed');
                     
                     const { file_id } = await uploadRes.json();
                     currentFileId = file_id;
@@ -315,20 +388,20 @@
                         const data = JSON.parse(event.data);
 
                         if (data.status === 'cancelled') {
-                            status.innerText = 'หยุดการทำงานเรียบร้อยแล้ว';
+                            status.innerText = 'Process halted by user.';
                             eventSource.close();
                             resetUI();
                         } else if (data.error) {
-                            status.innerText = 'Error: ' + data.error;
+                            status.innerText = 'System Error: ' + data.error;
                             eventSource.close();
                             resetUI();
                         } else if (data.progress < 100) {
-                            status.innerText = data.status || `ประมวลผล... (${data.progress}%)`;
+                            status.innerText = data.status || `Processing... (${data.progress}%)`;
                             progressFill.style.width = `${data.progress}%`;
                             percentText.innerText = `${data.progress}%`;
                         } else if (data.progress === 100 && data.download_url) {
                             isDone = true;
-                            status.innerText = 'ถอดความสำเร็จ!';
+                            status.innerText = 'Generation Complete';
                             progressFill.style.width = '100%';
                             percentText.innerText = '100%';
                             
@@ -337,19 +410,17 @@
 
                             const previewRes = await fetch(data.download_url);
                             const text = await previewRes.text();
-                            preview.innerText = text.substring(0, 2000);
+                            preview.innerText = text.substring(0, 3000);
                             
                             eventSource.close();
                             resetUI();
                         }
                     };
 
-                    eventSource.onerror = (e) => {
+                    eventSource.onerror = () => {
                         eventSource.close();
                         resetUI();
-                        if (!isDone) {
-                            status.innerText = 'การเชื่อมต่อขัดข้อง กรุณาลองใหม่อีกครั้ง';
-                        }
+                        if (!isDone) status.innerText = 'Connection lost. Retrying...';
                     };
 
                 } catch (e) {
@@ -359,7 +430,9 @@
             }
 
             function resetUI() {
-                document.getElementById('btn').disabled = false;
+                const btn = document.getElementById('btn');
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i><span>Generate Subtitles</span>`;
                 document.getElementById('stopBtn').classList.add('hidden');
                 currentFileId = null;
             }
