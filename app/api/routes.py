@@ -66,7 +66,7 @@ async def process_stream(
 
             final_result = None
             
-            for progress, result in transcription_gen:
+            for progress, status_text, result in transcription_gen:
                 if file_id in CANCEL_REQUESTS:
                     print(f"🛑 Cancellation requested for {file_id}")
                     yield f"data: {json.dumps({'status': 'cancelled'})}\n\n"
@@ -76,8 +76,8 @@ async def process_stream(
                     final_result = result
                     break
                 
-                yield f"data: {json.dumps({'progress': progress})}\n\n"
-                await asyncio.sleep(0.05)
+                yield f"data: {json.dumps({'progress': progress, 'status': status_text})}\n\n"
+                await asyncio.sleep(0.01)
 
             if final_result and file_id not in CANCEL_REQUESTS:
                 output_path = processor.process_words(
@@ -88,10 +88,8 @@ async def process_stream(
                 )
                 
                 if output_path and os.path.exists(output_path):
-                    print(f"✅ Success: File created at {output_path}")
-                    yield f"data: {json.dumps({'progress': 100, 'download_url': f'/api/download/{file_id}'})}\n\n"
+                    yield f"data: {json.dumps({'progress': 100, 'status': 'เสร็จสิ้น!', 'download_url': f'/api/download/{file_id}'})}\n\n"
                 else:
-                    print(f"⚠️ No speech detected or file not created for {file_id}")
                     yield f"data: {json.dumps({'error': 'ไม่พบเสียงที่ต้องการถอดความ หรือเกิดข้อผิดพลาดในการสร้างไฟล์'})}\n\n"
             
             # Cleanup
@@ -103,7 +101,6 @@ async def process_stream(
         except Exception as e:
             import traceback
             traceback.print_exc()
-            print(f"❌ Error during processing: {str(e)}")
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

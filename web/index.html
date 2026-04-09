@@ -310,6 +310,7 @@
                     const streamUrl = `/api/process/${file_id}?words_per_line=${words}&format_type=${format}&model_size=${model}&language=${language}`;
                     eventSource = new EventSource(streamUrl);
 
+                    let isDone = false;
                     eventSource.onmessage = async (event) => {
                         const data = JSON.parse(event.data);
 
@@ -322,10 +323,11 @@
                             eventSource.close();
                             resetUI();
                         } else if (data.progress < 100) {
-                            status.innerText = `ประมวลผลวิดีโอ... (${data.progress}%)`;
+                            status.innerText = data.status || `ประมวลผล... (${data.progress}%)`;
                             progressFill.style.width = `${data.progress}%`;
                             percentText.innerText = `${data.progress}%`;
                         } else if (data.progress === 100 && data.download_url) {
+                            isDone = true;
                             status.innerText = 'ถอดความสำเร็จ!';
                             progressFill.style.width = '100%';
                             percentText.innerText = '100%';
@@ -345,7 +347,9 @@
                     eventSource.onerror = (e) => {
                         eventSource.close();
                         resetUI();
-                        status.innerText = 'การเชื่อมต่อขัดข้อง กรุณาลองใหม่อีกครั้ง';
+                        if (!isDone) {
+                            status.innerText = 'การเชื่อมต่อขัดข้อง กรุณาลองใหม่อีกครั้ง';
+                        }
                     };
 
                 } catch (e) {

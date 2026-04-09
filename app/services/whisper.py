@@ -45,16 +45,18 @@ def transcribe_gen(
     word_timestamps=True
 ):
     """
-    Generator version of transcribe to report progress
+    Generator version of transcribe to report progress with status
+    Yields: (progress, status_message, result)
     """
+    yield 10, "กำลังโหลดโมเดล AI...", None
     model = get_model(model_size)
-    custom_vocab = load_vocab()
     
+    custom_vocab = load_vocab()
     prompt = "ภาษาไทย, พูดไทย, Thai language, transcribe correctly."
     if custom_vocab:
         prompt = f"{prompt} Keywords: {custom_vocab}"
 
-    print(f"🚀 Transcribing with Faster-Whisper | {model_size}")
+    yield 15, "กำลังเตรียมไฟล์เสียง...", None
 
     segments_gen, info = model.transcribe(
         path,
@@ -70,9 +72,14 @@ def transcribe_gen(
     total_duration = info.duration
     segments = []
 
+    # Transcription phase: 20% to 90%
     for s in segments_gen:
-        # Calculate progress based on segment end time
-        progress = min(int((s.end / total_duration) * 100), 99)
+        # Calculate progress within the 20-90 range
+        audio_progress = s.end / total_duration
+        p = 20 + int(audio_progress * 70)
+        p = min(p, 90)
+        
+        status = f"กำลังถอดความ... {int(s.end)} / {int(total_duration)} วินาที"
         
         seg_dict = {
             "start": s.start,
@@ -89,8 +96,7 @@ def transcribe_gen(
                 })
         
         segments.append(seg_dict)
-        # Yield current progress and segments so far
-        yield progress, None
+        yield p, status, None
 
-    # Final yield with full result
-    yield 100, {"segments": segments}
+    # Final result
+    yield 95, "กำลังจัดรูปแบบภาษาไทย...", {"segments": segments}
