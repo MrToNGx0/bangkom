@@ -66,7 +66,14 @@ def transcribe_gen(
         initial_prompt=prompt,
         condition_on_previous_text=False,
         vad_filter=True,
-        vad_parameters=dict(min_silence_duration_ms=500),
+        # ปรับค่า VAD ให้ดุดันขึ้น:
+        # min_silence_duration_ms: ลดลงเพื่อให้ตัดช่วงเงียบได้ละเอียดขึ้น (จาก 500 -> 300)
+        # speech_pad_ms: ลดขอบเวลาที่แถมให้ (ลดความหย่อนของช่วงเริ่ม/จบ)
+        vad_parameters=dict(
+            min_silence_duration_ms=300,
+            speech_pad_ms=200,
+            threshold=0.5
+        ),
     )
 
     total_duration = info.duration
