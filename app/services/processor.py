@@ -41,14 +41,23 @@ def split_thai_words_with_timing(merged_words):
                 total_chars = sum(len(t) for t in tokens)
                 duration = w["end"] - w["start"]
                 
+                # ปรับให้มีช่องว่างเล็กน้อยระหว่างคำในประโยคเดียวกัน (0.01s) เพื่อไม่ให้คำติดกันเกินไป
+                # แต่ยังคงความเป๊ะของช่วงเวลา
                 current_start = w["start"]
-                for t in tokens:
-                    # Distribute time based on character length ratio
+                for i, t in enumerate(tokens):
                     t_duration = (len(t) / total_chars) * duration
+                    
+                    t_end = current_start + t_duration
+                    
+                    # ลดความยาวคำสุดท้ายลงเล็กน้อยถ้าไม่ใช่คำเดียวโดดๆ เพื่อให้เห็นช่องว่างใน Timeline
+                    actual_end = t_end
+                    if i < len(tokens) - 1:
+                        actual_end -= 0.01 
+
                     new_words.append({
                         "word": t,
                         "start": current_start,
-                        "end": current_start + t_duration
+                        "end": max(current_start + 0.05, actual_end)
                     })
                     current_start += t_duration
                 continue
@@ -58,8 +67,8 @@ def split_thai_words_with_timing(merged_words):
 
 def merge_thai_tokens(raw_words):
     """
-    Aggressively merge Thai tokens that are close to each other, 
-    ignoring Whisper's guessed spaces.
+    Carefully merge Thai tokens that are likely fragments of the same word,
+    while preserving timing for distinct words.
     """
     if not raw_words:
         return []
@@ -69,6 +78,8 @@ def merge_thai_tokens(raw_words):
     
     for w in raw_words:
         word_text = w["word"]
+        # Whisper Thai often has leading spaces for new words/phrases
+        has_leading_space = word_text.startswith(" ")
         clean_w = clean_text(word_text)
         
         if not clean_w and word_text.strip():
@@ -76,14 +87,18 @@ def merge_thai_tokens(raw_words):
             
         should_merge = False
         if current:
-            # If both are Thai and the gap is very small (< 0.3s)
-            # we merge them regardless of spaces because Thai has no spaces.
             gap = w["start"] - current["end"]
-            if is_thai(current["word"][-1]) and is_thai(clean_w) and gap < 0.3:
-                should_merge = True
-            # Also merge if it's a known combining mark/fragment (no space at start)
-            elif not word_text.startswith(" ") and is_thai(current["word"][-1]) and is_thai(clean_w):
-                should_merge = True
+            
+            # 1. Merge if it's a known combining mark or fragment (no space and very close)
+            # Thai combining marks often appear as separate tokens in Whisper
+            is_fragment = not has_leading_space and gap < 0.1
+            
+            # 2. Merge if the gap is extremely small (likely same word split by AI)
+            is_tight = gap < 0.05
+            
+            if is_thai(current["word"][-1]) and is_thai(clean_w):
+                if is_tight or is_fragment:
+                    should_merge = True
         
         if should_merge:
             current["word"] += clean_w
@@ -151,12 +166,6 @@ def process_words(result, words_per_line=1, format_type="txt", file_id="output")
                 
                 start = chunk[0]["start"]
                 end = chunk[-1]["end"]
-                
-                # Smoother timing (Gapless)
-                if words_per_line == 1 and i < len(words) - 1:
-                    next_start = words[i+1]["start"]
-                    if next_start - end < 0.3:
-                        end = next_start
                 
                 if end <= start:
                     end = start + 0.1
