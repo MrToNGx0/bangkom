@@ -11,18 +11,62 @@ except ImportError:
 def is_thai(text):
     return bool(re.search('[\u0e00-\u0e7f]', text))
 
+def load_hallucinations():
+    h_path = os.path.join(config.VOCAB_DIR, "hallucinations.txt")
+    if not os.path.exists(h_path):
+        return []
+    with open(h_path, "r", encoding="utf-8") as f:
+        return [line.strip().lower() for line in f if line.strip() and not line.startswith("#")]
+
+# Cache hallucinations list
+HALLUCINATIONS = load_hallucinations()
+
 def format_time(t):
     return f"{int(t//3600):02}:{int((t%3600)//60):02}:{int(t%60):02},{int((t%1)*1000):03}"
 
 def clean_text(text):
     text = text.strip()
+    if not text:
+        return ""
+        
     if is_thai(text):
         # Remove common Whisper Thai hallucinations
         text = text.rstrip(',').rstrip('.')
     
-    if text.lower() in ['i', '.', ',', '!', '?']:
+    clean_low = text.lower()
+    for h in HALLUCINATIONS:
+        if h in clean_low and len(text) < len(h) + 5:
+            return ""
+
+    if text.lower() in ['i', '.', ',', '!', '?', '(', ')', '[', ']']:
         return ""
     return text
+
+def filter_repetitions(words):
+    """
+    Remove excessive word repetitions that often occur during noise or silence.
+    """
+    if len(words) < 3:
+        return words
+        
+    filtered = []
+    i = 0
+    while i < len(words):
+        # ตรวจสอบการซ้ำกัน 3 ครั้งติดกัน (เช่น "ครับ ครับ ครับ")
+        if i < len(words) - 2:
+            w1 = words[i]["word"].strip().lower()
+            w2 = words[i+1]["word"].strip().lower()
+            w3 = words[i+2]["word"].strip().lower()
+            
+            if w1 == w2 == w3 and is_thai(w1) and len(w1) > 0:
+                # ถ้าซ้ำ 3 ครั้ง ให้เก็บไว้แค่ 1 และข้ามที่เหลือ
+                filtered.append(words[i])
+                i += 3
+                continue
+        
+        filtered.append(words[i])
+        i += 1
+    return filtered
 
 def split_thai_words_with_timing(merged_words):
     """
@@ -142,7 +186,10 @@ def process_words(result, words_per_line=1, format_type="txt", file_id="output")
     # 1. Merge Thai fragments into solid phrases
     words = merge_thai_tokens(raw_words)
     
-    # 2. If 1 word per line, split those solid phrases into actual linguistic words
+    # 2. Filter hallucinations and repetitions
+    words = filter_repetitions(words)
+    
+    # 3. If 1 word per line, split those solid phrases into actual linguistic words
     if words_per_line == 1:
         words = split_thai_words_with_timing(words)
 
