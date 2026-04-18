@@ -78,7 +78,7 @@ async def manual_cleanup():
 @router.get("/process/{file_id}")
 async def process_stream(
     file_id: str,
-    words_per_line: int = 1,
+    segment_level: str = "auto",
     format_type: str = "txt",
     model_size: str = "base",
     language: str = "auto"
@@ -116,7 +116,7 @@ async def process_stream(
             if final_result and file_id not in CANCEL_REQUESTS:
                 output_path = processor.process_words(
                     final_result,
-                    words_per_line=words_per_line,
+                    segment_level=segment_level,
                     format_type=format_type,
                     file_id=file_id
                 )

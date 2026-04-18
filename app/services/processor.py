@@ -171,57 +171,154 @@ def join_words(buffer):
         res += w
     return res
 
-def process_words(result, words_per_line=1, format_type="txt", file_id="output"):
+def split_long_segment(text, start, end, max_chars=40, max_duration=6.0):
+    """
+    Splits a single long segment into multiple smaller ones 
+    based on character length and duration.
+    """
+    duration = end - start
+    if duration <= max_duration and len(text) <= max_chars:
+        return [{"text": text, "start": start, "end": end}]
+    
+    # Simple split by duration/length ratio
+    tokens = word_tokenize(text)
+    # Filter empty
+    tokens = [t for t in tokens if t.strip()]
+    
+    if not tokens:
+        return []
+        
+    segments = []
+    current_tokens = []
+    current_start = start
+    
+    total_chars = sum(len(t) for t in tokens)
+    processed_chars = 0
+    
+    for i, t in enumerate(tokens):
+        current_tokens.append(t)
+        processed_chars += len(t)
+        
+        current_text = "".join(current_tokens)
+        current_duration = (processed_chars / total_chars) * duration
+        
+        # Split if exceeds chars or duration
+        if len(current_text) >= max_chars or current_duration >= max_duration:
+            segments.append({
+                "text": current_text,
+                "start": current_start,
+                "end": current_start + current_duration
+            })
+            current_start += current_duration
+            current_tokens = []
+            
+    if current_tokens:
+        segments.append({
+            "text": "".join(current_tokens),
+            "start": current_start,
+            "end": end
+        })
+        
+    return segments
+
+def process_words(result, segment_level="auto", format_type="txt", file_id="output"):
     os.makedirs(config.OUTPUT_DIR, exist_ok=True)
     output_file = os.path.join(config.OUTPUT_DIR, f"{file_id}.{format_type}")
 
-    raw_words = []
-    for seg in result["segments"]:
-        for w in seg["words"]:
-            raw_words.append(w)
+    MAX_DUR = 6.0 # Maximum seconds a subtitle should stay
+    MAX_CHARS = 45 # Maximum characters per line for professional look
 
-    if not raw_words:
-        return ""
+    processed_segments = []
 
-    # 1. Merge Thai fragments into solid phrases
-    words = merge_thai_tokens(raw_words)
-    
-    # 2. Filter hallucinations and repetitions
-    words = filter_repetitions(words)
-    
-    # 3. If 1 word per line, split those solid phrases into actual linguistic words
-    if words_per_line == 1:
-        words = split_thai_words_with_timing(words)
+    if segment_level == "auto":
+        # Use Whisper segments but apply professional splitting
+        for seg in result["segments"]:
+            clean_seg_text = clean_text(seg["text"])
+            if not clean_seg_text:
+                continue
+            
+            # Split if original segment is too long
+            splits = split_long_segment(
+                clean_seg_text, 
+                seg["start"], 
+                seg["end"], 
+                max_chars=MAX_CHARS,
+                max_duration=MAX_DUR
+            )
+            processed_segments.extend(splits)
+    else:
+        # Flatten and re-group
+        raw_words = []
+        for seg in result["segments"]:
+            for w in seg["words"]:
+                raw_words.append(w)
 
+        if not raw_words:
+            return ""
+
+        words = merge_thai_tokens(raw_words)
+        words = filter_repetitions(words)
+        
+        # Configuration for levels
+        if segment_level == "single":
+            words = split_thai_words_with_timing(words)
+            group_size = 1
+            max_d = 2.0
+        elif segment_level == "short":
+            group_size = 6
+            max_d = 3.5
+        elif segment_level == "medium":
+            group_size = 12
+            max_d = 5.0
+        else: # long
+            group_size = 20
+            max_d = 7.0
+
+        current_group = []
+        for w in words:
+            current_group.append(w)
+            
+            # Grouping criteria: 
+            # 1. Reached count limit 
+            # 2. Duration limit reached
+            # 3. Gap detected (Pause in speech)
+            
+            duration = current_group[-1]["end"] - current_group[0]["start"]
+            gap = 0
+            if len(current_group) > 1:
+                # If there's a gap > 0.5s, it's a natural break
+                gap = w["start"] - words[words.index(w)-1]["end"]
+
+            if len(current_group) >= group_size or duration >= max_d or gap > 0.5:
+                start = current_group[0]["start"]
+                end = current_group[-1]["end"]
+                text = join_words([item["word"] for item in current_group])
+                
+                processed_segments.append({
+                    "text": text,
+                    "start": start,
+                    "end": end
+                })
+                current_group = []
+        
+        if current_group:
+            processed_segments.append({
+                "text": join_words([item["word"] for item in current_group]),
+                "start": current_group[0]["start"],
+                "end": current_group[-1]["end"]
+            })
+
+    # Exporting
     if format_type == "txt":
         with open(output_file, "w", encoding="utf-8") as f:
-            buffer = []
-            for w in words:
-                buffer.append(w["word"])
-                if len(buffer) >= words_per_line:
-                    f.write(join_words(buffer) + "\n")
-                    buffer = []
-            if buffer:
-                f.write(join_words(buffer) + "\n")
+            for seg in processed_segments:
+                f.write(seg["text"] + "\n")
 
     elif format_type == "srt":
         with open(output_file, "w", encoding="utf-8") as f:
-            idx = 1
-            for i in range(0, len(words), words_per_line):
-                chunk = words[i : i + words_per_line]
-                if not chunk: continue
-                
-                start = chunk[0]["start"]
-                end = chunk[-1]["end"]
-                
-                if end <= start:
-                    end = start + 0.1
-                
-                text = join_words([w["word"] for w in chunk])
-                
+            for idx, seg in enumerate(processed_segments, 1):
                 f.write(f"{idx}\n")
-                f.write(f"{format_time(start)} --> {format_time(end)}\n")
-                f.write(f"{text}\n\n")
-                idx += 1
+                f.write(f"{format_time(seg['start'])} --> {format_time(seg['end'])}\n")
+                f.write(f"{seg['text']}\n\n")
 
     return output_file
