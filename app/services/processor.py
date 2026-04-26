@@ -46,22 +46,22 @@ def filter_repetitions(words):
     """
     Remove excessive word repetitions that often occur during noise or silence.
     """
-    if len(words) < 3:
+    if len(words) < 2:
         return words
         
     filtered = []
     i = 0
     while i < len(words):
-        # ตรวจสอบการซ้ำกัน 3 ครั้งติดกัน (เช่น "ครับ ครับ ครับ")
-        if i < len(words) - 2:
+        # ตรวจสอบการซ้ำกัน (เช่น "ครับ ครับ" หรือ "ครับ ครับ ครับ")
+        if i < len(words) - 1:
             w1 = words[i]["word"].strip().lower()
             w2 = words[i+1]["word"].strip().lower()
-            w3 = words[i+2]["word"].strip().lower()
             
-            if w1 == w2 == w3 and is_thai(w1) and len(w1) > 0:
-                # ถ้าซ้ำ 3 ครั้ง ให้เก็บไว้แค่ 1 และข้ามที่เหลือ
-                filtered.append(words[i])
-                i += 3
+            # ถ้าเป็นคำไทยและซ้ำกัน และระยะห่างน้อยมาก (AI ค้าง)
+            gap = words[i+1]["start"] - words[i]["end"]
+            if w1 == w2 and is_thai(w1) and len(w1) > 0 and gap < 0.2:
+                # ข้ามคำที่ซ้ำ
+                i += 1
                 continue
         
         filtered.append(words[i])
@@ -140,8 +140,11 @@ def merge_thai_tokens(raw_words):
             # 2. Merge if the gap is extremely small (likely same word split by AI)
             is_tight = gap < 0.05
             
+            # 3. Merge if it starts with a Thai vowel or tone mark (must be a fragment)
+            is_fragment_char = clean_w and clean_w[0] in 'ะาิีึืุูเแโใไ็่้๊๋์'
+            
             if is_thai(current["word"][-1]) and is_thai(clean_w):
-                if is_tight or is_fragment:
+                if is_tight or is_fragment or is_fragment_char:
                     should_merge = True
         
         if should_merge:

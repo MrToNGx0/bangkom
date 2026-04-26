@@ -52,7 +52,7 @@ def transcribe_gen(
     model = get_model(model_size)
     
     custom_vocab = load_vocab()
-    prompt = "ภาษาไทย, พูดไทย, Thai language, transcribe correctly."
+    prompt = "นี่คือเสียงภาษาไทย ถอดความทุกคำพูดอย่างถูกต้อง แม่นยำ และครบถ้วน"
     if custom_vocab:
         prompt = f"{prompt} Keywords: {custom_vocab}"
 
@@ -61,10 +61,13 @@ def transcribe_gen(
     segments_gen, info = model.transcribe(
         path,
         language=None if language == "auto" else language,
-        beam_size=5,
+        beam_size=10,
         word_timestamps=word_timestamps,
         initial_prompt=prompt,
         condition_on_previous_text=False,
+        repetition_penalty=1.2,
+        no_repeat_ngram_size=3,
+        no_speech_threshold=0.6,
         vad_filter=True,
         # ปรับค่า VAD ให้ดุดันขึ้น:
         # min_silence_duration_ms: ลดลงเพื่อให้ตัดช่วงเงียบได้ละเอียดขึ้น (จาก 500 -> 300)
