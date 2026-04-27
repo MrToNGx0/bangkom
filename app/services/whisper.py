@@ -67,15 +67,15 @@ def transcribe_gen(
         condition_on_previous_text=False,
         repetition_penalty=1.2,
         no_repeat_ngram_size=3,
-        no_speech_threshold=0.6,
+        no_speech_threshold=0.5,
         vad_filter=True,
-        # ปรับค่า VAD ให้ดุดันขึ้น:
-        # min_silence_duration_ms: ลดลงเพื่อให้ตัดช่วงเงียบได้ละเอียดขึ้น (จาก 500 -> 300)
-        # speech_pad_ms: ลดขอบเวลาที่แถมให้ (ลดความหย่อนของช่วงเริ่ม/จบ)
+        # ปรับค่า VAD ให้ไวขึ้น (หูไวขึ้น) และแถมเวลาช่วงเริ่มให้มากขึ้น
+        # threshold: ลดลงเพื่อให้ดักเสียงเบาๆ ตอนเริ่มได้ (0.5 -> 0.3)
+        # speech_pad_ms: เพิ่มจาก 200 เป็น 400 เพื่อให้ซับขึ้นมารอก่อนพูดเล็กน้อย
         vad_parameters=dict(
             min_silence_duration_ms=300,
-            speech_pad_ms=200,
-            threshold=0.5
+            speech_pad_ms=400,
+            threshold=0.3
         ),
     )
 
