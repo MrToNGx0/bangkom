@@ -3,6 +3,8 @@ import threading
 import torch
 import os
 from app.core import config
+from app.core.database import SessionLocal
+from app.models.db_models import Vocab
 
 models = {}
 lock = threading.Lock()
@@ -28,14 +30,14 @@ def get_model(size="base"):
 
 
 def load_vocab():
-    vocab_path = os.path.join(config.VOCAB_DIR, "vocab.txt")
-    if not os.path.exists(vocab_path):
-        return ""
-    
-    with open(vocab_path, "r", encoding="utf-8") as f:
-        lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-    
-    return ", ".join(lines)
+    db = SessionLocal()
+    try:
+        items = db.query(Vocab).all()
+        if not items:
+            return ""
+        return ", ".join([i.word for i in items])
+    finally:
+        db.close()
 
 
 def transcribe_gen(

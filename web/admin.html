@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="th">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bangkom AI • Knowledge Management</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+        <script>
+            tailwind.config = {
+                darkMode: 'class',
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['"Plus Jakarta Sans"', 'Sarabun', 'sans-serif'],
+                        },
+                        colors: {
+                            brand: {
+                                50: '#f5f7ff', 100: '#ebf0fe', 200: '#dae3fd', 300: '#bcc9fb',
+                                400: '#94a5f7', 500: '#6373f1', 600: '#464de7', 700: '#393ccf',
+                                800: '#3234a8', 900: '#2d2f86', 950: '#1d1e4f',
+                            },
+                        }
+                    }
+                }
+            };
+        </script>
+
+        <style>
+            body { background-image: radial-gradient(at 0% 0%, hsla(230,100%,95%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(240,100%,98%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(250,100%,95%,1) 0, transparent 50%); }
+            .dark body { background-image: radial-gradient(at 0% 0%, hsla(230,30%,10%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(240,30%,8%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(250,30%,10%,1) 0, transparent 50%); background-color: #020617; }
+            .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.3); }
+            .dark .glass-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); }
+        </style>
+    </head>
+
+    <body class="min-h-screen font-sans transition-colors duration-500 overflow-x-hidden">
+        <div class="container mx-auto px-4 py-12 flex flex-col items-center min-h-screen">
+            <div class="w-full max-w-4xl glass-card rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+                
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+                    <div class="flex items-center gap-4">
+                        <a href="/" class="bg-brand-600 w-12 h-12 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-arrow-left text-white"></i>
+                        </a>
+                        <div>
+                            <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">Knowledge Base</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Manage AI vocabulary and filters</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+                        <button onclick="switchTab('vocab')" id="tab-vocab" class="px-6 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-brand-600 dark:text-brand-400">Vocab</button>
+                        <button onclick="switchTab('halluc')" id="tab-halluc" class="px-6 py-2 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-brand-600">Hallucinations</button>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="mb-8 flex gap-3">
+                    <input type="text" id="newItemInput" placeholder="Add new keyword..." class="flex-1 px-6 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 dark:text-white font-medium" />
+                    <button onclick="addItem()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg shadow-brand-500/20">Add</button>
+                </div>
+
+                <!-- List Area -->
+                <div class="relative group">
+                    <div class="bg-white/50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-200 dark:border-slate-800 p-6 min-h-[400px]">
+                        <div id="loading" class="flex justify-center items-center h-64">
+                            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-500"></i>
+                        </div>
+                        <div id="itemList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <!-- Items will be injected here -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            let currentTab = 'vocab';
+            const input = document.getElementById('newItemInput');
+            const list = document.getElementById('itemList');
+            const loading = document.getElementById('loading');
+
+            async function switchTab(tab) {
+                currentTab = tab;
+                document.getElementById('tab-vocab').className = tab === 'vocab' ? 'px-6 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-brand-600 dark:text-brand-400' : 'px-6 py-2 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-brand-600';
+                document.getElementById('tab-halluc').className = tab === 'halluc' ? 'px-6 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-slate-700 shadow-sm text-brand-600 dark:text-brand-400' : 'px-6 py-2 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-brand-600';
+                input.placeholder = tab === 'vocab' ? 'Add new vocabulary...' : 'Add hallucination filter...';
+                await loadItems();
+            }
+
+            async function loadItems() {
+                loading.classList.remove('hidden');
+                list.innerHTML = '';
+                const endpoint = currentTab === 'vocab' ? '/api/admin/vocab' : '/api/admin/hallucinations';
+                try {
+                    const res = await fetch(endpoint);
+                    const items = await res.json();
+                    loading.classList.add('hidden');
+                    
+                    if (items.length === 0) {
+                        list.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">No items found</div>`;
+                        return;
+                    }
+
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'group flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm hover:border-brand-300 dark:hover:border-brand-500/50 transition-all';
+                        div.innerHTML = `
+                            <span class="text-slate-700 dark:text-slate-200 font-medium truncate pr-2">${item.text}</span>
+                            <button onclick="deleteItem(${item.id})" class="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 transition-all">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        `;
+                        list.appendChild(div);
+                    });
+                } catch (e) {
+                    alert('Failed to load items');
+                }
+            }
+
+            async function addItem() {
+                const text = input.value.trim();
+                if (!text) return;
+                
+                const endpoint = currentTab === 'vocab' ? '/api/admin/vocab' : '/api/admin/hallucinations';
+                try {
+                    const res = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text })
+                    });
+                    if (res.ok) {
+                        input.value = '';
+                        await loadItems();
+                    } else {
+                        const err = await res.json();
+                        alert(err.detail || 'Failed to add item');
+                    }
+                } catch (e) {
+                    alert('Error adding item');
+                }
+            }
+
+            async function deleteItem(id) {
+                if (!confirm('Are you sure?')) return;
+                const endpoint = currentTab === 'vocab' ? `/api/admin/vocab/${id}` : `/api/admin/hallucinations/${id}`;
+                try {
+                    const res = await fetch(endpoint, { method: 'DELETE' });
+                    if (res.ok) await loadItems();
+                } catch (e) {
+                    alert('Delete failed');
+                }
+            }
+
+            // Init
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+            loadItems();
+        </script>
+    </body>
+</html>

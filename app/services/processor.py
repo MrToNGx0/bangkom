@@ -1,6 +1,8 @@
 import os
 import re
 from app.core import config
+from app.core.database import SessionLocal
+from app.models.db_models import Hallucination
 
 try:
     from pythainlp.tokenize import word_tokenize
@@ -12,14 +14,12 @@ def is_thai(text):
     return bool(re.search('[\u0e00-\u0e7f]', text))
 
 def load_hallucinations():
-    h_path = os.path.join(config.VOCAB_DIR, "hallucinations.txt")
-    if not os.path.exists(h_path):
-        return []
-    with open(h_path, "r", encoding="utf-8") as f:
-        return [line.strip().lower() for line in f if line.strip() and not line.startswith("#")]
-
-# Cache hallucinations list
-HALLUCINATIONS = load_hallucinations()
+    db = SessionLocal()
+    try:
+        items = db.query(Hallucination).all()
+        return [i.text.strip().lower() for i in items]
+    finally:
+        db.close()
 
 def format_time(t):
     return f"{int(t//3600):02}:{int((t%3600)//60):02}:{int(t%60):02},{int((t%1)*1000):03}"
@@ -34,7 +34,8 @@ def clean_text(text):
         text = text.rstrip(',').rstrip('.')
     
     clean_low = text.lower()
-    for h in HALLUCINATIONS:
+    hallucinations = load_hallucinations()
+    for h in hallucinations:
         if h in clean_low and len(text) < len(h) + 5:
             return ""
 
