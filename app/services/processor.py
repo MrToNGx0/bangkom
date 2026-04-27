@@ -83,17 +83,20 @@ def split_thai_words_with_timing(merged_words):
             
             if len(tokens) > 1:
                 total_chars = sum(len(t) for t in tokens)
-                duration = w["end"] - w["start"]
+                original_duration = w["end"] - w["start"]
                 
-                # ปรับให้มีช่องว่างเล็กน้อยระหว่างคำในประโยคเดียวกัน (0.01s) เพื่อไม่ให้คำติดกันเกินไป
-                # แต่ยังคงความเป๊ะของช่วงเวลา
+                # SNAPPING: จำกัดความยาวไม่ให้ยืดเกินจริง (อิงตามจำนวนตัวอักษร)
+                # ปกติคนพูดภาษาไทย 1 ตัวอักษร (รวมสระ) ไม่ควรเกิน 0.15 วินาที
+                # และคำนึงถึงช่วงเวลาขั้นต่ำ 0.2s สำหรับคำสั้นๆ
+                max_natural_dur = max(0.2, total_chars * 0.15)
+                duration = min(original_duration, max_natural_dur)
+                
+                # ปรับให้มีช่องว่างเล็กน้อยระหว่างคำในประโยคเดียวกัน (0.01s)
                 current_start = w["start"]
                 for i, t in enumerate(tokens):
                     t_duration = (len(t) / total_chars) * duration
                     
                     t_end = current_start + t_duration
-                    
-                    # ลดความยาวคำสุดท้ายลงเล็กน้อยถ้าไม่ใช่คำเดียวโดดๆ เพื่อให้เห็นช่องว่างใน Timeline
                     actual_end = t_end
                     if i < len(tokens) - 1:
                         actual_end -= 0.01 
@@ -106,6 +109,13 @@ def split_thai_words_with_timing(merged_words):
                     current_start += t_duration
                 continue
         
+        # สำหรับคำโดดๆ ที่ไม่เข้าเงื่อนไข Split ก็ควรถูก Snap ด้วยถ้ามันยาวผิดปกติ
+        text = clean_text(w["word"])
+        if text:
+            max_natural_dur = max(0.2, len(text) * 0.15)
+            if (w["end"] - w["start"]) > max_natural_dur:
+                w["end"] = w["start"] + max_natural_dur
+
         new_words.append(w)
     return new_words
 
