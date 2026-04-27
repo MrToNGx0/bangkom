@@ -262,9 +262,11 @@ def process_words(result, segment_level="auto", format_type="txt", file_id="outp
         words = merge_thai_tokens(raw_words)
         words = filter_repetitions(words)
         
+        # บังคับตัดคำทุกโหมดเพื่อให้การนับคำแม่นยำและเห็นความต่างชัดเจน
+        words = split_thai_words_with_timing(words)
+        
         # Configuration for levels
         if segment_level == "single":
-            words = split_thai_words_with_timing(words)
             group_size = 1
             max_d = 2.0
         elif segment_level == "short":
@@ -278,30 +280,28 @@ def process_words(result, segment_level="auto", format_type="txt", file_id="outp
             max_d = 7.0
 
         current_group = []
-        for w in words:
+        for i, w in enumerate(words):
             current_group.append(w)
             
-            # Grouping criteria: 
-            # 1. Reached count limit 
-            # 2. Duration limit reached
-            # 3. Gap detected (Pause in speech)
-            
             duration = current_group[-1]["end"] - current_group[0]["start"]
-            gap = 0
-            if len(current_group) > 1:
-                # If there's a gap > 0.5s, it's a natural break
-                gap = w["start"] - words[words.index(w)-1]["end"]
+            
+            # ตรวจสอบช่องว่างระหว่างคำนี้กับคำถัดไป
+            gap_to_next = 0
+            if i < len(words) - 1:
+                gap_to_next = words[i+1]["start"] - w["end"]
 
-            if len(current_group) >= group_size or duration >= max_d or gap > 0.5:
-                start = current_group[0]["start"]
-                end = current_group[-1]["end"]
-                text = join_words([item["word"] for item in current_group])
-                
+            # เงื่อนไขการตัดบรรทัด: ครบจำนวนคำ, นานเกินไป, หรือมีช่วงหยุดพูด (Gap > 0.3s)
+            if len(current_group) >= group_size or duration >= max_d or gap_to_next >= 0.3:
                 processed_segments.append({
-                    "text": text,
-                    "start": start,
-                    "end": end
+                    "text": join_words([item["word"] for item in current_group]),
+                    "start": current_group[0]["start"],
+                    "end": current_group[-1]["end"]
                 })
+                
+                # หากมีช่วงหยุดพูดชัดเจน ให้มาร์คไว้เพื่อแทรกบรรทัดว่างใน txt
+                if gap_to_next >= 0.3:
+                    processed_segments.append({"text": "", "is_blank": True})
+                    
                 current_group = []
         
         if current_group:
@@ -315,13 +315,20 @@ def process_words(result, segment_level="auto", format_type="txt", file_id="outp
     if format_type == "txt":
         with open(output_file, "w", encoding="utf-8") as f:
             for seg in processed_segments:
-                f.write(seg["text"] + "\n")
+                if seg.get("is_blank"):
+                    f.write("\n") # แทรกบรรทัดว่าง
+                else:
+                    f.write(seg["text"] + "\n")
 
     elif format_type == "srt":
         with open(output_file, "w", encoding="utf-8") as f:
-            for idx, seg in enumerate(processed_segments, 1):
-                f.write(f"{idx}\n")
+            srt_idx = 1
+            for seg in processed_segments:
+                if seg.get("is_blank"):
+                    continue
+                f.write(f"{srt_idx}\n")
                 f.write(f"{format_time(seg['start'])} --> {format_time(seg['end'])}\n")
                 f.write(f"{seg['text']}\n\n")
+                srt_idx += 1
 
     return output_file
