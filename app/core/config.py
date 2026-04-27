@@ -15,6 +15,6 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(VOCAB_DIR, exist_ok=True)
 
 # Default Model settings
-DEFAULT_MODEL = "large-v3-turbo"
+DEFAULT_MODEL = "large-v3"
 ALLOWED_MODELS = ["base", "small", "medium", "large-v3-turbo", "large-v3"]
 ALLOWED_LANGUAGES = ["auto", "th", "en", "ja", "zh"]
